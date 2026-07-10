@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { AuthService } from '../services/auth.service';
 import { signUpSchema, signInSchema } from '../schemas/auth.schema';
+import { STORAGE_KEYS } from '../constants/storage.constant';
 
 interface SignUpBody {
   email: string;
@@ -31,7 +32,7 @@ export default async function authRoutes(app: FastifyInstance) {
       const token = service.signToken(user._id!.toString(), user.email);
 
       reply
-        .setCookie('access_token', token, {
+        .setCookie(STORAGE_KEYS.ACCESS_TOKEN, token, {
           httpOnly: true,
           secure: app.config.NODE_ENV === 'production',
           sameSite: 'strict',
@@ -66,7 +67,7 @@ export default async function authRoutes(app: FastifyInstance) {
       const maxAge = rememberMe ? 60 * 60 * 24 * 7 : undefined;
 
       reply
-        .setCookie('access_token', token, {
+        .setCookie(STORAGE_KEYS.ACCESS_TOKEN, token, {
           httpOnly: true,
           secure: app.config.NODE_ENV === 'production',
           sameSite: 'strict',
@@ -86,7 +87,7 @@ export default async function authRoutes(app: FastifyInstance) {
     { preHandler: [app.authenticate] },
     async (_request, reply) => {
       reply
-        .clearCookie('access_token', { path: '/' })
+        .clearCookie(STORAGE_KEYS.ACCESS_TOKEN, { path: '/' })
         .send({ message: 'Logged out.' });
     },
   );
